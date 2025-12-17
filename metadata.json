@@ -1,0 +1,5 @@
+{
+  "name": "CloudAnim Studio",
+  "description": "A professional point cloud visualization and animation tool supporting custom attributes, SE3 transformations, and GIF export.",
+  "requestFramePermissions": []
+}

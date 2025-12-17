@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { VisMode, AnimationState, SE3Transform, Hierarchy } from '../types';
-import { Upload, Play, Download, Settings, RefreshCw, Box, Layers, Eye, RotateCcw, ChevronRight, ChevronDown, Palette } from 'lucide-react';
+import { Upload, Play, Download, Settings, RefreshCw, Box, Layers, Eye, RotateCcw, ChevronRight, ChevronDown, Palette, Trash2 } from 'lucide-react';
 
 interface ControlPanelProps {
   onImport: (files: FileList) => void;
   onGenerate: () => void;
+  onClear: () => void;
   visMode: VisMode;
   setVisMode: (m: VisMode) => void;
   animState: AnimationState;
@@ -22,6 +23,7 @@ interface ControlPanelProps {
 const ControlPanel: React.FC<ControlPanelProps> = ({
   onImport,
   onGenerate,
+  onClear,
   visMode,
   setVisMode,
   animState,
@@ -90,9 +92,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         <div className="mb-4 space-y-2">
            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Data Source</h2>
            <div className="flex gap-2">
-            <label className="flex-1 bg-gray-800 hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center justify-center gap-2 border border-gray-600 transition">
+            <label className="flex-1 bg-gray-800 hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center justify-center gap-2 border border-gray-600 transition overflow-hidden whitespace-nowrap">
               <Upload size={16} />
-              <span className="text-xs">Upload PLYs</span>
+              <span className="text-xs">Upload</span>
               <input 
                 type="file" 
                 multiple 
@@ -103,10 +105,17 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             </label>
             <button 
               onClick={onGenerate}
-              className="flex-1 bg-gray-800 hover:bg-gray-700 p-2 rounded flex items-center justify-center gap-2 border border-gray-600 transition"
+              className="flex-1 bg-gray-800 hover:bg-gray-700 p-2 rounded flex items-center justify-center gap-2 border border-gray-600 transition overflow-hidden whitespace-nowrap"
             >
               <RefreshCw size={16} />
-              <span className="text-xs">Gen Example</span>
+              <span className="text-xs">Example</span>
+            </button>
+            <button 
+              onClick={onClear}
+              className="px-3 bg-red-900/30 hover:bg-red-900/50 border border-red-900/50 text-red-400 rounded transition flex items-center justify-center"
+              title="Clear All Data"
+            >
+              <Trash2 size={16} />
             </button>
            </div>
         </div>

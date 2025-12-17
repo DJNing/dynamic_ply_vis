@@ -160,6 +160,12 @@ const App: React.FC = () => {
     setTgtData(tgt);
   };
 
+  const handleClear = () => {
+    setSrcData(null);
+    setTgtData(null);
+    setHierarchy({});
+  };
+
   const startAnim1 = () => {
     setAnimState(prev => ({ ...prev, isPlaying1: true, anim1Progress: 0 }));
   };
@@ -232,6 +238,7 @@ const App: React.FC = () => {
       <ControlPanel 
         onImport={handleImport}
         onGenerate={handleGenerate}
+        onClear={handleClear}
         visMode={visMode}
         setVisMode={setVisMode}
         animState={animState}

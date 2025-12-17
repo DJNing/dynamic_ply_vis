@@ -94,6 +94,7 @@ const App: React.FC = () => {
   const [tgtData, setTgtData] = useState<PointCloudData | null>(null);
   const [visMode, setVisMode] = useState<VisMode>(VisMode.RGB);
   const [hierarchy, setHierarchy] = useState<Hierarchy>({});
+  const [bgColor, setBgColor] = useState<string>('#d4d4d4');
   
   const [animState, setAnimState] = useState<AnimationState>({
     displacement: [5, 0, 0],
@@ -180,17 +181,17 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex w-full h-screen bg-neutral-200">
+    <div className="flex w-full h-screen" style={{ backgroundColor: bgColor }}>
       {/* 3D Viewport */}
       <div className="flex-1 relative">
         <Canvas camera={{ position: [10, 10, 10], fov: 50 }} gl={{ preserveDrawingBuffer: true }}>
-          <color attach="background" args={['#d4d4d4']} />
+          <color attach="background" args={[bgColor]} />
           <ambientLight intensity={0.6} />
           <pointLight position={[10, 10, 10]} intensity={1.2} />
           
           <OrbitControls makeDefault />
-          {/* Updated Grid for light background */}
-          <Grid infiniteGrid fadeDistance={50} sectionColor="#ffffff" cellColor="#a3a3a3" />
+          {/* Grid adapts slightly based on simple heuristic or just stays neutral */}
+          <Grid infiniteGrid fadeDistance={50} sectionColor={bgColor === '#000000' ? '#444' : '#ffffff'} cellColor={bgColor === '#000000' ? '#222' : '#a3a3a3'} />
           
           <AnimationController state={animState} setState={setAnimState} />
           <Recorder recording={animState.isRecording} setRecording={(b) => setAnimState(p => ({...p, isRecording: b}))} />
@@ -241,6 +242,8 @@ const App: React.FC = () => {
         resetAnim1={resetAnim1}
         resetAnim2={resetAnim2}
         exportGif={toggleRecording}
+        bgColor={bgColor}
+        setBgColor={setBgColor}
       />
     </div>
   );

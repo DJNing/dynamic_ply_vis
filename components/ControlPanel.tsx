@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { VisMode, AnimationState, SE3Transform, Hierarchy } from '../types';
-import { Upload, Play, Download, Settings, RefreshCw, Box, Layers, Eye, RotateCcw, ChevronRight, ChevronDown } from 'lucide-react';
+import { Upload, Play, Download, Settings, RefreshCw, Box, Layers, Eye, RotateCcw, ChevronRight, ChevronDown, Palette } from 'lucide-react';
 
 interface ControlPanelProps {
   onImport: (files: FileList) => void;
@@ -15,6 +15,8 @@ interface ControlPanelProps {
   resetAnim1: () => void;
   resetAnim2: () => void;
   exportGif: () => void;
+  bgColor: string;
+  setBgColor: (c: string) => void;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -29,7 +31,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   startAnim2,
   resetAnim1,
   resetAnim2,
-  exportGif
+  exportGif,
+  bgColor,
+  setBgColor
 }) => {
   const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set([0]));
 
@@ -109,7 +113,21 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
         {/* Visualization Mode */}
         <div className="mb-6">
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Visualization</h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Visualization</h2>
+            <div className="flex items-center gap-2" title="Background Color">
+               <Palette size={14} className="text-gray-500" />
+               <div className="w-5 h-5 rounded-full overflow-hidden border border-gray-600 relative">
+                 <input 
+                    type="color" 
+                    value={bgColor} 
+                    onChange={(e) => setBgColor(e.target.value)} 
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] cursor-pointer p-0 border-0"
+                 />
+               </div>
+            </div>
+          </div>
+          
           <div className="grid grid-cols-3 gap-2">
             {[
               { mode: VisMode.RGB, label: 'RGB', icon: Eye },

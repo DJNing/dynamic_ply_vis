@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { VisMode, AnimationState, SE3Transform, Hierarchy } from '../types';
-import { Upload, Play, Download, Settings, RefreshCw, Box, Layers, Eye, RotateCcw, ChevronRight, ChevronDown, Palette, Trash2 } from 'lucide-react';
+import { Upload, Play, Download, Settings, RefreshCw, Box, Layers, Eye, RotateCcw, ChevronRight, ChevronDown, Palette, Trash2, Maximize } from 'lucide-react';
 
 interface ControlPanelProps {
   onImport: (files: FileList) => void;
@@ -81,6 +81,10 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       });
   };
 
+  const updateGlobalScale = (val: number) => {
+      setAnimState(prev => ({ ...prev, globalScale: val }));
+  };
+
   return (
     <div className="w-80 h-full bg-gray-900 text-gray-100 p-4 overflow-y-auto flex flex-col gap-6 border-l border-gray-700 shadow-xl custom-scrollbar">
       <div>
@@ -136,7 +140,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             </div>
           </div>
           
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2 mb-4">
             {[
               { mode: VisMode.RGB, label: 'RGB', icon: Eye },
               { mode: VisMode.GROUP_ID, label: 'Group', icon: Layers },
@@ -152,6 +156,20 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               </button>
             ))}
           </div>
+
+          {/* Global Scale Input */}
+           <div className="flex items-center gap-2 bg-gray-800 p-2 rounded border border-gray-700">
+               <Maximize size={14} className="text-gray-500" />
+               <span className="text-xs text-gray-400 whitespace-nowrap">Global Scale:</span>
+               <input 
+                 type="number" 
+                 step="0.1" 
+                 min="0.1"
+                 value={animState.globalScale}
+                 onChange={(e) => updateGlobalScale(parseFloat(e.target.value))}
+                 className="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs text-right focus:border-blue-500 outline-none"
+               />
+           </div>
         </div>
       </div>
 

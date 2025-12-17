@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Grid } from '@react-three/drei';
+import { TrackballControls, Grid } from '@react-three/drei';
 import * as THREE from 'three';
 import { PointCloudData, VisMode, AnimationState, Hierarchy } from './types';
 import { generateExampleData, parsePLY, extractHierarchy } from './utils/plyHelper';
@@ -104,7 +104,8 @@ const App: React.FC = () => {
     targetSE3: { rotation: [0, 45, 0], translation: [2, 2, 0] },
     isPlaying1: false,
     isPlaying2: false,
-    isRecording: false
+    isRecording: false,
+    globalScale: 1.0
   });
 
   // Extract hierarchy when data changes
@@ -187,7 +188,7 @@ const App: React.FC = () => {
           <ambientLight intensity={0.6} />
           <pointLight position={[10, 10, 10]} intensity={1.2} />
           
-          <OrbitControls makeDefault />
+          <TrackballControls makeDefault rotateSpeed={4.0} />
           {/* Grid adapts slightly based on simple heuristic or just stays neutral */}
           <Grid infiniteGrid fadeDistance={50} sectionColor={bgColor === '#000000' ? '#444' : '#ffffff'} cellColor={bgColor === '#000000' ? '#222' : '#a3a3a3'} />
           

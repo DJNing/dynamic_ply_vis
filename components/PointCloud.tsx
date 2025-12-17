@@ -75,7 +75,7 @@ const PointCloud: React.FC<PointCloudProps> = ({ data, visMode, animState }) => 
   });
 
   return (
-    <points geometry={data.geometry}>
+    <points geometry={data.geometry} scale={[animState.globalScale, animState.globalScale, animState.globalScale]}>
       <shaderMaterial
         ref={materialRef}
         vertexShader={VERTEX_SHADER}

@@ -26,6 +26,7 @@ export interface AnimationState {
   isPlaying1: boolean;
   isPlaying2: boolean;
   isRecording: boolean;
+  globalScale: number;
 }
 
 export type Hierarchy = Record<number, number[]>;

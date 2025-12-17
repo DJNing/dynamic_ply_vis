@@ -90,8 +90,7 @@ const AnimationController = ({
 };
 
 const App: React.FC = () => {
-  const [srcData, setSrcData] = useState<PointCloudData | null>(null);
-  const [tgtData, setTgtData] = useState<PointCloudData | null>(null);
+  const [data, setData] = useState<PointCloudData | null>(null);
   const [visMode, setVisMode] = useState<VisMode>(VisMode.RGB);
   const [hierarchy, setHierarchy] = useState<Hierarchy>({});
   const [bgColor, setBgColor] = useState<string>('#d4d4d4');
@@ -108,10 +107,10 @@ const App: React.FC = () => {
     isRecording: false
   });
 
-  // Extract hierarchy when srcData changes
+  // Extract hierarchy when data changes
   useEffect(() => {
-    if (srcData) {
-      const h = extractHierarchy(srcData);
+    if (data) {
+      const h = extractHierarchy(data);
       setHierarchy(h);
       
       // Auto-select first available group and part
@@ -130,7 +129,7 @@ const App: React.FC = () => {
     } else {
       setHierarchy({});
     }
-  }, [srcData]);
+  }, [data]);
 
   // Load example data on mount
   useEffect(() => {
@@ -140,14 +139,9 @@ const App: React.FC = () => {
   const handleImport = async (files: FileList) => {
     if (files.length < 1) return;
     try {
-      // Very basic logic: First file is src, second is tgt if exists
-      const src = await parsePLY(files[0]);
-      setSrcData(src);
-      
-      if (files.length > 1) {
-        const tgt = await parsePLY(files[1]);
-        setTgtData(tgt);
-      }
+      // Process only the first file
+      const p = await parsePLY(files[0]);
+      setData(p);
     } catch (e) {
       console.error(e);
       alert("Error parsing PLY files. Ensure they match the required binary format.");
@@ -155,14 +149,12 @@ const App: React.FC = () => {
   };
 
   const handleGenerate = () => {
-    const { src, tgt } = generateExampleData();
-    setSrcData(src);
-    setTgtData(tgt);
+    const p = generateExampleData();
+    setData(p);
   };
 
   const handleClear = () => {
-    setSrcData(null);
-    setTgtData(null);
+    setData(null);
     setHierarchy({});
   };
 
@@ -202,33 +194,23 @@ const App: React.FC = () => {
           <AnimationController state={animState} setState={setAnimState} />
           <Recorder recording={animState.isRecording} setRecording={(b) => setAnimState(p => ({...p, isRecording: b}))} />
 
-          {srcData && (
+          {data && (
             <PointCloud 
-              data={srcData} 
+              data={data} 
               visMode={visMode} 
-              animState={animState} 
-              isSource={true} 
-            />
-          )}
-
-          {tgtData && (
-            <PointCloud 
-              data={tgtData} 
-              visMode={visMode} 
-              animState={animState} 
-              isSource={false} 
+              animState={animState}
             />
           )}
         </Canvas>
 
-        {/* Legend / Overlay - Updated for Light Mode */}
+        {/* Legend / Overlay - Updated for Logic */}
         <div className="absolute top-4 left-4 pointer-events-none">
           <div className="bg-white/80 p-2 rounded text-xs text-gray-900 backdrop-blur-sm shadow-sm border border-gray-300">
             <div className="flex items-center gap-2 mb-1">
-              <span className="w-3 h-3 bg-red-600 rounded-full opacity-80"></span> Source (Reddish)
+              <span className="w-3 h-3 bg-red-600 rounded-full opacity-80"></span> Group 0 (Source/Moving)
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 bg-blue-600 rounded-full opacity-80"></span> Target (Blueish)
+              <span className="w-3 h-3 bg-blue-600 rounded-full opacity-80"></span> Group 1 (Target/Static)
             </div>
           </div>
         </div>

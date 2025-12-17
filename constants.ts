@@ -48,9 +48,14 @@ void main() {
     }
 
     // Animation 1: Displacement
-    // Start at (Src + Disp), End at (Src). Progress 0 -> 1.
+    // Only apply to Group 0 (Source). Group 1 (Target) stays static.
     // Pos = Src + Disp * (1.0 - Progress)
-    vec3 animatedPos = position + uDisplacement * (1.0 - uAnim1Progress);
+    vec3 animatedPos = position;
+    
+    // Check if group_id is 0 (allow small float error)
+    if (abs(group_id - 0.0) < 0.1) {
+         animatedPos = position + uDisplacement * (1.0 - uAnim1Progress);
+    }
 
     // Animation 2: SE3 Transform on selection
     // Only apply if matches selection

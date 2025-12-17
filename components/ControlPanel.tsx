@@ -94,10 +94,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
            <div className="flex gap-2">
             <label className="flex-1 bg-gray-800 hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center justify-center gap-2 border border-gray-600 transition overflow-hidden whitespace-nowrap">
               <Upload size={16} />
-              <span className="text-xs">Upload</span>
+              <span className="text-xs">Upload PLY</span>
               <input 
                 type="file" 
-                multiple 
                 accept=".ply" 
                 className="hidden" 
                 onChange={(e) => e.target.files && onImport(e.target.files)} 

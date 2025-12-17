@@ -83,84 +83,79 @@ export const parsePLY = async (file: File): Promise<PointCloudData> => {
   return { geometry, count: vertexCount };
 };
 
-export const generateExampleData = (): { src: PointCloudData, tgt: PointCloudData } => {
+export const generateExampleData = (): PointCloudData => {
   const countPerPart = 5000;
-  const groups = 2;
+  const groups = 2; // Group 0 (Src), Group 1 (Tgt)
   const partsPerGroup = 2;
   const totalPoints = countPerPart * groups * partsPerGroup;
 
-  const createBuffer = (isTarget: boolean) => {
-    const positions = new Float32Array(totalPoints * 3);
-    const colors = new Float32Array(totalPoints * 3);
-    const groupIds = new Float32Array(totalPoints);
-    const partIds = new Float32Array(totalPoints);
+  const positions = new Float32Array(totalPoints * 3);
+  const colors = new Float32Array(totalPoints * 3);
+  const groupIds = new Float32Array(totalPoints);
+  const partIds = new Float32Array(totalPoints);
 
-    let idx = 0;
-    for (let g = 0; g < groups; g++) {
-      for (let p = 0; p < partsPerGroup; p++) {
-        // Center of the cluster
-        const cx = (g - 0.5) * 4;
-        const cy = (p - 0.5) * 4;
-        const cz = 0;
+  let idx = 0;
+  for (let g = 0; g < groups; g++) {
+    for (let p = 0; p < partsPerGroup; p++) {
+      // Center of the cluster
+      const cx = (g - 0.5) * 4;
+      const cy = (p - 0.5) * 4;
+      const cz = 0;
 
-        for (let i = 0; i < countPerPart; i++) {
-          // Random sphere
-          const u = Math.random();
-          const v = Math.random();
-          const theta = 2 * Math.PI * u;
-          const phi = Math.acos(2 * v - 1);
-          const r = 1.5 * Math.cbrt(Math.random());
-          
-          let x = cx + r * Math.sin(phi) * Math.cos(theta);
-          let y = cy + r * Math.sin(phi) * Math.sin(theta);
-          let z = cz + r * Math.cos(phi);
+      for (let i = 0; i < countPerPart; i++) {
+        // Random sphere
+        const u = Math.random();
+        const v = Math.random();
+        const theta = 2 * Math.PI * u;
+        const phi = Math.acos(2 * v - 1);
+        const r = 1.5 * Math.cbrt(Math.random());
+        
+        let x = cx + r * Math.sin(phi) * Math.cos(theta);
+        let y = cy + r * Math.sin(phi) * Math.sin(theta);
+        let z = cz + r * Math.cos(phi);
 
-          // If target, apply some slight transform to make it interesting
-          if (isTarget) {
-            x += (Math.random() - 0.5) * 0.2;
-            y += (Math.random() - 0.5) * 0.2;
-            z += (Math.random() - 0.5) * 0.2;
-          }
+        const isTarget = g === 1;
 
-          positions[idx * 3] = x;
-          positions[idx * 3 + 1] = y;
-          positions[idx * 3 + 2] = z;
-
-          // Base colors - Make them darker/vibrant for light background
-          if (isTarget) {
-            // Blue/Indigo shade (Vibrant)
-            colors[idx * 3] = 0.1 + Math.random() * 0.1; 
-            colors[idx * 3 + 1] = 0.3 + Math.random() * 0.2;
-            colors[idx * 3 + 2] = 0.8 + Math.random() * 0.2; 
-          } else {
-             // Red/Orange shade (Vibrant)
-            colors[idx * 3] = 0.9 + Math.random() * 0.1; 
-            colors[idx * 3 + 1] = 0.1 + Math.random() * 0.2;
-            colors[idx * 3 + 2] = 0.1 + Math.random() * 0.1;
-          }
-
-          groupIds[idx] = g;
-          partIds[idx] = p;
-
-          idx++;
+        // If target (Group 1), apply some slight transform to make it interesting
+        if (isTarget) {
+          x += (Math.random() - 0.5) * 0.2;
+          y += (Math.random() - 0.5) * 0.2;
+          z += (Math.random() - 0.5) * 0.2;
         }
+
+        positions[idx * 3] = x;
+        positions[idx * 3 + 1] = y;
+        positions[idx * 3 + 2] = z;
+
+        // Base colors - Make them darker/vibrant for light background
+        if (isTarget) {
+          // Blue/Indigo shade (Vibrant) for Target (Group 1)
+          colors[idx * 3] = 0.1 + Math.random() * 0.1; 
+          colors[idx * 3 + 1] = 0.3 + Math.random() * 0.2;
+          colors[idx * 3 + 2] = 0.8 + Math.random() * 0.2; 
+        } else {
+           // Red/Orange shade (Vibrant) for Source (Group 0)
+          colors[idx * 3] = 0.9 + Math.random() * 0.1; 
+          colors[idx * 3 + 1] = 0.1 + Math.random() * 0.2;
+          colors[idx * 3 + 2] = 0.1 + Math.random() * 0.1;
+        }
+
+        groupIds[idx] = g;
+        partIds[idx] = p;
+
+        idx++;
       }
     }
+  }
 
-    const geom = new THREE.BufferGeometry();
-    geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    geom.setAttribute('group_id', new THREE.BufferAttribute(groupIds, 1));
-    geom.setAttribute('part_id', new THREE.BufferAttribute(partIds, 1));
-    geom.computeBoundingSphere();
-    
-    return { geometry: geom, count: totalPoints };
-  };
-
-  return {
-    src: createBuffer(false),
-    tgt: createBuffer(true)
-  };
+  const geom = new THREE.BufferGeometry();
+  geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  geom.setAttribute('group_id', new THREE.BufferAttribute(groupIds, 1));
+  geom.setAttribute('part_id', new THREE.BufferAttribute(partIds, 1));
+  geom.computeBoundingSphere();
+  
+  return { geometry: geom, count: totalPoints };
 };
 
 export const extractHierarchy = (data: PointCloudData): Hierarchy => {

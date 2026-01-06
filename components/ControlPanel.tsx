@@ -47,7 +47,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         arr[axis] = val;
         newSE3[field] = arr;
       }
-      // Set Anim 2 to 1 (End State / SE3) so we see the transform immediately while editing
+      // Keep Anim 2 at 1 (End State) while editing to see changes
       return { ...prev, targetSE3: newSE3, anim2Progress: 1, isPlaying2: false };
     });
   };
@@ -57,7 +57,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         ...prev,
         selectedGroup: groupId,
         selectedPart: partId,
-        // Set Anim 2 to 1 on selection change to preview the current SE3 settings on the new part
         anim2Progress: 1,
         isPlaying2: false
     }));
@@ -76,13 +75,28 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
     setAnimState(prev => {
         const d = [...prev.displacement] as [number, number, number];
         d[axis] = val;
-        // Reset Anim 1 to 0 so we see the displacement immediately
         return { ...prev, displacement: d, anim1Progress: 0, isPlaying1: false };
       });
   };
 
   const updateGlobalScale = (val: number) => {
       setAnimState(prev => ({ ...prev, globalScale: val }));
+  };
+
+  const updateAnim2Progress = (val: number) => {
+    setAnimState(prev => ({
+      ...prev,
+      anim2Progress: val,
+      isPlaying2: false // Manual control stops auto-play
+    }));
+  };
+
+  const updateAnim1Progress = (val: number) => {
+    setAnimState(prev => ({
+      ...prev,
+      anim1Progress: val,
+      isPlaying1: false // Manual control stops auto-play
+    }));
   };
 
   return (
@@ -163,10 +177,10 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                <span className="text-xs text-gray-400 whitespace-nowrap">Global Scale:</span>
                <input 
                  type="number" 
-                 step="0.1" 
-                 min="0.1"
+                 step="0.01" 
+                 min="0.01"
                  value={animState.globalScale}
-                 onChange={(e) => updateGlobalScale(parseFloat(e.target.value))}
+                 onChange={(e) => updateGlobalScale(parseFloat(e.target.value) || 1.0)}
                  className="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs text-right focus:border-blue-500 outline-none"
                />
            </div>
@@ -192,6 +206,18 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               <span className="text-xs w-8 text-right font-mono">{animState.displacement[i].toFixed(1)}</span>
             </div>
           ))}
+
+          <div className="flex flex-col gap-1 mt-2">
+            <label className="text-[10px] text-gray-500 uppercase tracking-tighter">Progress Scrub</label>
+            <input
+              type="range"
+              min="0" max="1" step="0.01"
+              value={animState.anim1Progress}
+              onChange={(e) => updateAnim1Progress(parseFloat(e.target.value))}
+              className="w-full h-1 bg-blue-900/40 rounded-lg appearance-none cursor-pointer"
+            />
+          </div>
+
           <div className="flex gap-2">
             <button
               onClick={startAnim1}
@@ -227,7 +253,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                     Object.entries(hierarchy).map(([gId, parts]) => {
                         const groupId = parseInt(gId);
                         const isExpanded = expandedGroups.has(groupId);
-                        // Cast parts to number[] to avoid unknown type error
                         const sortedParts = [...(parts as number[])].sort((a,b) => a-b);
                         
                         return (
@@ -263,9 +288,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                     })
                 )}
             </div>
-            <div className="text-[10px] text-gray-500 mt-1 text-right">
-                Selected: G{animState.selectedGroup} / P{animState.selectedPart}
-            </div>
         </div>
 
         {/* Translation Controls */}
@@ -275,9 +297,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 <div key={`t-${axis}`} className="flex items-center gap-2">
                     <span className="text-xs w-4 text-gray-500">{axis}</span>
                     <input
-                        type="number" step="0.5"
+                        type="number" step="0.1"
                         value={animState.targetSE3.translation[i]}
-                        onChange={(e) => updateSE3('translation', i, parseFloat(e.target.value))}
+                        onChange={(e) => updateSE3('translation', i, parseFloat(e.target.value) || 0)}
                         className="flex-1 bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs outline-none focus:border-purple-500"
                     />
                 </div>
@@ -291,13 +313,32 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 <div key={`r-${axis}`} className="flex items-center gap-2">
                     <span className="text-xs w-4 text-gray-500">{axis}</span>
                     <input
-                        type="number" step="5"
+                        type="number" step="1"
                         value={animState.targetSE3.rotation[i]}
-                        onChange={(e) => updateSE3('rotation', i, parseFloat(e.target.value))}
+                        onChange={(e) => updateSE3('rotation', i, parseFloat(e.target.value) || 0)}
                         className="flex-1 bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs outline-none focus:border-purple-500"
                     />
                 </div>
             ))}
+        </div>
+
+        {/* Progress Slider */}
+        <div className="mb-6 space-y-1">
+            <div className="flex justify-between items-center">
+              <label className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Anim 2 Progress</label>
+              <span className="text-[10px] font-mono text-purple-400">{(animState.anim2Progress * 100).toFixed(0)}%</span>
+            </div>
+            <input
+              type="range"
+              min="0" max="1" step="0.01"
+              value={animState.anim2Progress}
+              onChange={(e) => updateAnim2Progress(parseFloat(e.target.value))}
+              className="w-full h-2 bg-purple-900/30 rounded-lg appearance-none cursor-pointer accent-purple-500 hover:bg-purple-900/50 transition-colors"
+            />
+            <div className="flex justify-between text-[8px] text-gray-600 px-1">
+              <span>START (Identity)</span>
+              <span>END (Target)</span>
+            </div>
         </div>
 
         <div className="flex gap-2">
